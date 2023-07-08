@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://dfkfrspqsl8ps"]
+
+[ext_resource type="FontFile" uid="uid://dy36cl451ii0x" path="res://fonts/CourierPrime-Regular.ttf" id="1_ycos3"]
+[ext_resource type="Script" path="res://objects/output_window.gd" id="2_kr8an"]
+
+[node name="output_window" type="RichTextLabel"]
+custom_minimum_size = Vector2(30, 0)
+offset_right = 1165.0
+offset_bottom = 671.0
+theme_override_fonts/mono_font = ExtResource("1_ycos3")
+theme_override_font_sizes/normal_font_size = 100
+theme_override_font_sizes/mono_font_size = 80
+bbcode_enabled = true
+text = "[code]Output[/code]
+
+here"
+script = ExtResource("2_kr8an")

@@ -22,4 +22,8 @@ script = ExtResource("1_d658i")
 [node name="deleteFromEndTimer" type="Timer" parent="."]
 autostart = true
 
+[node name="moveInDeletingCharacters" type="Timer" parent="."]
+autostart = true
+
 [connection signal="timeout" from="deleteFromEndTimer" to="." method="_on_delete_from_end_timer_timeout"]
+[connection signal="timeout" from="moveInDeletingCharacters" to="." method="_on_move_in_deleting_characters_timeout"]
