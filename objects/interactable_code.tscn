@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://c5b7r4rek08no"]
+
+[ext_resource type="Script" path="res://objects/interactable_code.gd" id="1_d658i"]
+[ext_resource type="FontFile" uid="uid://dy36cl451ii0x" path="res://fonts/CourierPrime-Regular.ttf" id="1_ywqvi"]
+
+[node name="interactable_code" type="RichTextLabel"]
+custom_minimum_size = Vector2(30, 0)
+offset_right = 1165.0
+offset_bottom = 671.0
+theme_override_fonts/mono_font = ExtResource("1_ywqvi")
+theme_override_font_sizes/normal_font_size = 100
+theme_override_font_sizes/mono_font_size = 80
+bbcode_enabled = true
+text = "[code]hi there,  my name is
+
+no[color=green]t[/color]
+really[/code]
+
+here"
+script = ExtResource("1_d658i")
+
+[node name="deleteFromEndTimer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="deleteFromEndTimer" to="." method="_on_delete_from_end_timer_timeout"]

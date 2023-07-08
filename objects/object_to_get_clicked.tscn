@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://b02r4ht5grrgq"]
+
+[ext_resource type="Texture2D" uid="uid://cncpo4puuo8fw" path="res://assets/redBall.png" id="1_4aiox"]
+[ext_resource type="Script" path="res://objects/object_to_get_clicked.gd" id="1_hap3t"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_e2foy"]
+radius = 73.0274
+
+[node name="objectToGetClicked" type="Node2D"]
+script = ExtResource("1_hap3t")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_4aiox")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_e2foy")
+
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

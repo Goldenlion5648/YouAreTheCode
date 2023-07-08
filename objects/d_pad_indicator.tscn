@@ -1,0 +1,46 @@
+[gd_scene load_steps=4 format=3 uid="uid://dg25xkj6w7bwr"]
+
+[ext_resource type="Texture2D" uid="uid://dthknaofnjjyi" path="res://assets/dPad.png" id="1_38hk7"]
+[ext_resource type="Script" path="res://objects/d_pad_indicator.gd" id="1_flgvk"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xa7lh"]
+size = Vector2(140, 44)
+
+[node name="dPadIndicator" type="Node2D"]
+script = ExtResource("1_flgvk")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.434531, 0.434531)
+texture = ExtResource("1_38hk7")
+
+[node name="upSide" type="StaticBody2D" parent="."]
+position = Vector2(0, -160)
+
+[node name="ColorRect" type="ColorRect" parent="upSide"]
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0.74902, 0.658824, 0.956863, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="upSide"]
+shape = SubResource("RectangleShape2D_xa7lh")
+
+[node name="leftSide" type="StaticBody2D" parent="."]
+position = Vector2(-168, 0)
+rotation = 1.5708
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="leftSide"]
+shape = SubResource("RectangleShape2D_xa7lh")
+
+[node name="rightSide" type="StaticBody2D" parent="."]
+position = Vector2(169, 6)
+rotation = 1.5708
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="rightSide"]
+shape = SubResource("RectangleShape2D_xa7lh")
+
+[node name="downSide" type="StaticBody2D" parent="."]
+position = Vector2(1, 328)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="downSide"]
+position = Vector2(3, -158)
+shape = SubResource("RectangleShape2D_xa7lh")
