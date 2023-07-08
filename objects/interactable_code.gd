@@ -5,12 +5,23 @@ var text_to_show: String = ""
 var player_current_line_number = 0
 var player_pos_in_line = 2
 
+var next_level_text = "submit"
+var output_word = "output"
+
+@onready var eat_letter_sound = $eatLetterSound
+@onready var print_sound = $printSound
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	show_backspace_coming()
 	self.text_to_show = Globals.get_current_level_data()
 	print(zip_coming_characters(text_to_show))
 	self.text = get_formatted_text_to_show()
+	var a = [1, 2, 3]
+	var b = a.duplicate(true)
+	a.pop_back()
+	print(b)
+	
 
 func get_player_overall_pos():
 	var player_overall_pos = 0
@@ -27,36 +38,62 @@ func get_player_overall_pos():
 
 func remove_space_from_deleting_data_beginning():
 	var text_to_show_lines = text_to_show.split("\n")
-	for i in range(Globals.deleting_data[Globals.current_level].size()):
-		if Globals.deleting_data[Globals.current_level][i].length() >= 1:
-			var deleted_character = Globals.deleting_data[Globals.current_level][0]
-			Globals.deleting_data[Globals.current_level][i] = Globals.deleting_data[Globals.current_level][i].substr(1)
-			if Globals.deleting_data[Globals.current_level][i].length() == 0:
+	for i in range(Globals.current_deleting_data.size()):
+		if Globals.current_deleting_data[i].length() >= 1:
+			var deleted_character = Globals.current_deleting_data[i][0] + ""
+			print("deleted character=", deleted_character)
+			Globals.current_deleting_data[i] = Globals.current_deleting_data[i].substr(1)
+			if Globals.current_deleting_data[i].length() == 0:
 				#TODO: check if the character was supposed to delete the single character (current) or whole line
 				text_to_show_lines[i] = text_to_show_lines[i].substr(0, text_to_show_lines[i].length() - 1)
+				eat_letter_sound.play()
+				Globals.current_deleting_data[i] = deleted_character
+	print(text_to_show_lines)
 	text_to_show = "\n".join(text_to_show_lines)
 	
 
 func zip_coming_characters(string_to_edit: String) -> String:
-	var ret = ""
+	var ret = []
 	var lines = string_to_edit.split("\n")
-	for i in range(min(lines.size(), Globals.current_deleting_data.size())):
-		ret += lines[i] + "[color=red]" + Globals.current_deleting_data[i] + "[/color]" + "\n"
-	return ret
+	for i in range(lines.size()):
+		if i < Globals.current_deleting_data.size() and Globals.current_deleting_data[i] != "":
+			ret.append(lines[i] + "[color=red]" + Globals.current_deleting_data[i] + "[/color]")
+		else:
+			ret.append(lines[i])
+	return "\n".join(ret)
+
+func add_line_numbers(to_add_to: String) -> String:
+	var lines = to_add_to.split("\n")
+	for i in range(lines.size()):
+		if player_current_line_number == i:
+			lines[i] = "[bgcolor=#3e3d32]" + str(i + 1) + "|" + ">" + lines[i] + "[/bgcolor]"
+		else:
+			lines[i] = str(i + 1) + "|" + " " + lines[i]
+	return "\n".join(lines) 
 
 func get_formatted_text_to_show():
 	var player_overall_pos = get_player_overall_pos()
 	
+	
+	
 	var player_pos_showing = (text_to_show.substr(0, player_overall_pos) +
-				"[u][color=green]" + text_to_show.substr(player_overall_pos, 1) + "[/color][/u]" +
+				"[u][color=green]" + text_to_show.substr(player_overall_pos, 1) + "[/color][/u][font_size=1].[/font_size]" +
 				text_to_show.substr(player_overall_pos + 1))
 			
+#	print("player_pos_showing\n", player_pos_showing)
+#	var lines_for_highlight = player_pos_showing.split("\n")
+#	lines_for_highlight[player_current_line_number] = "[u]" + lines_for_highlight[player_current_line_number] + "[/u]"
+	
+	
+#	var zipped = zip_coming_characters("\n".join(lines_for_highlight))
 	var zipped = zip_coming_characters(player_pos_showing)
-	var with_code_tag = add_code_tag_to_string(zipped)
+#	print("zipped\n", zipped)
+	var with_line_numbers = add_line_numbers(zipped)
+	var with_code_tag = Globals.add_code_tag_to_string(with_line_numbers)
+	print("with code tag\n", with_code_tag)
 	return with_code_tag
 
-func add_code_tag_to_string(to_edit) -> String:
-	return ("[code]" + to_edit +"[/code]")
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -102,28 +139,33 @@ func get_word_on_cursor():
 	if right_space == -1:
 		right_space = text_to_show.length()
 	
-	
 	print("left space is ", left_space)
 	print("right space is ", right_space)
 	var word_on_cursor = text_to_show.substr(left_space, right_space - left_space)
 	return word_on_cursor
 
-func check_level_advance():
-	var word_on_cursor = get_word_on_cursor()
-	print("word on cursor is ", word_on_cursor)
-	if word_on_cursor.strip_edges() == "exit":
+func advance_level():
+	if Globals.curret_output == Globals.current_level_goal:
 		print("level complete!")
 		Globals.current_level += 1
 		Globals.restart_current_level()
+
+func check_level_advance():
+#	var word_on_cursor = get_word_on_cursor()
+#	print("word on cursor is ", word_on_cursor)
+#	if word_on_cursor.strip_edges() == next_level_text:
+#		advance_level()
+	pass
 
 
 
 func run_current_line():
 	var current_line_text = text_to_show.split("\n")[player_current_line_number]
-	if current_line_text.begins_with("say"):
+	if current_line_text.begins_with(output_word):
 		var words_on_line = current_line_text.split(" ")
 		if words_on_line.size() > 1:
 			Globals.curret_output += words_on_line[1]
+			print_sound.play()
 	
 func show_backspace_coming():
 	var test_string = """hi
@@ -140,8 +182,9 @@ func check_input():
 	var moved = false
 	if Input.is_action_just_pressed("enter_word"):
 		print("checking")
+		run_current_line()	
+		advance_level()
 #		check_level_advance()
-		run_current_line()
 	if Input.is_action_just_pressed("reset"):
 		Globals.restart_current_level()
 	if Input.is_action_just_pressed("down"):
@@ -162,17 +205,26 @@ func check_input():
 	if moved:
 		adjust_for_edge_cases()
 		update_text_display()
+		move_deleting_characters()
+		adjust_for_edge_cases()
+		update_text_display()
 		print("word on cursor is ", get_word_on_cursor())
 
 func _on_delete_from_end_timer_timeout():
 #	text_to_show = text_to_show.substr(0, text_to_show.length() - 1)
-	update_text_display()
-	$deleteFromEndTimer.start()
+#	update_text_display()
+#	$deleteFromEndTimer.start()
+	pass
 
-func _on_move_in_deleting_characters_timeout():
+func move_deleting_characters():
 	remove_space_from_deleting_data_beginning()
+	
 	update_text_display()
 	$moveInDeletingCharacters.start()
+
+func _on_move_in_deleting_characters_timeout():
+	pass
+#	move_deleting_characters()
 
 
 

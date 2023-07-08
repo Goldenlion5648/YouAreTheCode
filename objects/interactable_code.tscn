@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://c5b7r4rek08no"]
+[gd_scene load_steps=5 format=3 uid="uid://c5b7r4rek08no"]
 
 [ext_resource type="Script" path="res://objects/interactable_code.gd" id="1_d658i"]
 [ext_resource type="FontFile" uid="uid://dy36cl451ii0x" path="res://fonts/CourierPrime-Regular.ttf" id="1_ywqvi"]
+[ext_resource type="AudioStream" uid="uid://ddrneqtcy7rvh" path="res://sounds/keypress.wav" id="3_7smto"]
+[ext_resource type="AudioStream" uid="uid://d4mm45tjgu4v" path="res://sounds/printSound.wav" id="4_n66mq"]
 
 [node name="interactable_code" type="RichTextLabel"]
 custom_minimum_size = Vector2(30, 0)
@@ -9,7 +11,7 @@ offset_right = 1165.0
 offset_bottom = 671.0
 theme_override_fonts/mono_font = ExtResource("1_ywqvi")
 theme_override_font_sizes/normal_font_size = 100
-theme_override_font_sizes/mono_font_size = 80
+theme_override_font_sizes/mono_font_size = 66
 bbcode_enabled = true
 text = "[code]hi there,  my name is
 
@@ -24,6 +26,14 @@ autostart = true
 
 [node name="moveInDeletingCharacters" type="Timer" parent="."]
 autostart = true
+
+[node name="eatLetterSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("3_7smto")
+volume_db = 5.621
+
+[node name="printSound" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("4_n66mq")
+volume_db = 19.279
 
 [connection signal="timeout" from="deleteFromEndTimer" to="." method="_on_delete_from_end_timer_timeout"]
 [connection signal="timeout" from="moveInDeletingCharacters" to="." method="_on_move_in_deleting_characters_timeout"]

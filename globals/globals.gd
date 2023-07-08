@@ -10,36 +10,54 @@ var curret_output = "":
 		formatted_output = get_formatted_text_to_show()
 
 func get_formatted_text_to_show():
-	return ("[code]Ouptut:\n" + 
-				curret_output + 
+	return ("[code]Output: " + curret_output + 
 			"[/code]")
-
 
 
 var levels = [
 	"""
-say 1
-say 2
-exit
-say 3
+output 1
+output 2
+output 3
 """.strip_edges(),
 """
-say 5
-say 6
-exit
-say 7
+output 5
+output 7
+output 9
+output 6
 """.strip_edges(),
+"""
+output 0
+output 0
+output 536
+output 5
+""".strip_edges(),
+]
+
+var level_goals = [
+	"123",
+	"967",
+	"5365",
 ]
 
 var deleting_data = [
+	[],
 	[
-		"  D",
-		"     <"
+		"",
+		"",
+		"",
+		"----◀"
+	],
+	[
+		"",
+		"",
+		"---◀",
+		"-◀"
 	]
 ]
-var current_deleting_data = deleting_data[current_level]
-
+var current_deleting_data = deleting_data[current_level].duplicate(true)
 var current_level_data = levels[current_level]
+var current_level_goal = level_goals[current_level]
 
 var lines_to_remove_from = []
 ##returns spots that just got deleted
@@ -49,18 +67,25 @@ var lines_to_remove_from = []
 #			deleting_data[current_level] = deleting_data[current_level].substr(1)
 #			if deleting_data[current_level].length() == 0:
 #				lines_to_remove_from.append(i)
+func add_code_tag_to_string(to_edit) -> String:
+	return ("[code]" + to_edit +"[/code]")
 
-var current_level: int = 0:
+
+var current_level: int = 2:
 	set(value):
 		current_level = value
 		current_level_data = levels[current_level]
-		current_deleting_data = deleting_data[current_level]
+		current_deleting_data = deleting_data[current_level].duplicate(true)
+		current_level_goal = level_goals[current_level]
 
 func get_current_level_data():
 	return levels[current_level]
 	
 func _ready():
 	formatted_output = get_formatted_text_to_show()
+	current_level = current_level + 0
 
 func restart_current_level():
+	current_level = current_level + 0
+	curret_output = ""
 	get_tree().reload_current_scene()

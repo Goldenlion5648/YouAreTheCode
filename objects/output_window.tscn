@@ -11,7 +11,5 @@ theme_override_fonts/mono_font = ExtResource("1_ycos3")
 theme_override_font_sizes/normal_font_size = 100
 theme_override_font_sizes/mono_font_size = 80
 bbcode_enabled = true
-text = "[code]Output[/code]
-
-here"
+text = "[code]Output:[/code]"
 script = ExtResource("2_kr8an")

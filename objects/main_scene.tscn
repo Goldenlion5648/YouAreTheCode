@@ -1,16 +1,62 @@
-[gd_scene load_steps=3 format=3 uid="uid://iyhi1gcl40iy"]
+[gd_scene load_steps=5 format=3 uid="uid://iyhi1gcl40iy"]
 
 [ext_resource type="PackedScene" uid="uid://c5b7r4rek08no" path="res://objects/interactable_code.tscn" id="1_me5ax"]
 [ext_resource type="PackedScene" uid="uid://dfkfrspqsl8ps" path="res://objects/output_window.tscn" id="2_3ycww"]
+[ext_resource type="PackedScene" uid="uid://c861ilg07e3r7" path="res://objects/goal_output.tscn" id="3_dx4wd"]
+[ext_resource type="Script" path="res://objects/goal_output.gd" id="4_jqebl"]
 
 [node name="MainScene" type="Node2D"]
 
 [node name="interactable_code" parent="." instance=ExtResource("1_me5ax")]
-offset_right = 623.0
+offset_right = 837.0
+theme_override_constants/line_separation = -5
+theme_override_font_sizes/mono_font_size = 60
+text = "[code]say
+say 
+exit
+say 3
+[/code]"
 
-[node name="output_window" parent="." instance=ExtResource("2_3ycww")]
-offset_left = 647.0
-offset_top = 388.0
-offset_right = 1125.0
-offset_bottom = 664.0
-text = "[code]Output[/code]"
+[node name="instructions" parent="." instance=ExtResource("3_dx4wd")]
+offset_left = 838.0
+offset_top = 4.0
+offset_right = 1154.0
+offset_bottom = 394.0
+theme_override_font_sizes/mono_font_size = 30
+text = "[code]Instructions:
+Arrow keys or WASD to move
+
+Enter or spacebar to run current line
+
+Make your output match the goal 
+[/code]"
+script = null
+
+[node name="BoxContainer" type="BoxContainer" parent="."]
+layout_direction = 1
+offset_right = 1204.0
+offset_bottom = 342.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_left = 656.0
+offset_top = 479.0
+offset_right = 1156.0
+offset_bottom = 649.0
+theme_override_constants/separation = 10
+
+[node name="output_window" parent="VBoxContainer" instance=ExtResource("2_3ycww")]
+custom_minimum_size = Vector2(400, 80)
+layout_mode = 2
+theme_override_font_sizes/mono_font_size = 60
+fit_content = true
+
+[node name="goal_window" parent="VBoxContainer" instance=ExtResource("3_dx4wd")]
+custom_minimum_size = Vector2(400, 80)
+layout_direction = 2
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 60
+theme_override_font_sizes/mono_font_size = 60
+text = "[code]Goal:[/code]"
+autowrap_mode = 0
+tab_size = 1
+script = ExtResource("4_jqebl")
