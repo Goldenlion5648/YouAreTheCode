@@ -1,8 +1,8 @@
 extends Node
 
 
-		
 var formatted_output = ""
+var should_play_reset_sound = false
 
 var curret_output = "":
 	set(value):
@@ -29,15 +29,30 @@ output 6
 """
 output 0
 output 0
-output 536
+output 53
 output 5
+""".strip_edges(),
+"""
+output 0
+goto 5
+output 867
+output 5
+output 9
+""".strip_edges(),
+"""
+goto 3
+goto 4
+goto 2
+output 9
 """.strip_edges(),
 ]
 
 var level_goals = [
 	"123",
 	"967",
-	"5365",
+	"535",
+	"9867",
+	"9999",
 ]
 
 var deleting_data = [
@@ -46,15 +61,29 @@ var deleting_data = [
 		"",
 		"",
 		"",
-		"----◀"
+		"----<"
 	],
 	[
 		"",
 		"",
-		"---◀",
-		"-◀"
+		"---<",
+		"-<"
+	],
+	[
+		"",
+		"",
+		"",
+		"",
+		"-«",
+	],
+	[
+		"",
+		"",
+		"",
+		"«",
 	]
 ]
+
 var current_deleting_data = deleting_data[current_level].duplicate(true)
 var current_level_data = levels[current_level]
 var current_level_goal = level_goals[current_level]
@@ -71,7 +100,7 @@ func add_code_tag_to_string(to_edit) -> String:
 	return ("[code]" + to_edit +"[/code]")
 
 
-var current_level: int = 2:
+var current_level: int = 0:
 	set(value):
 		current_level = value
 		current_level_data = levels[current_level]
@@ -81,6 +110,7 @@ var current_level: int = 2:
 func get_current_level_data():
 	return levels[current_level]
 	
+#var previous_level = -1
 func _ready():
 	formatted_output = get_formatted_text_to_show()
 	current_level = current_level + 0
@@ -89,3 +119,4 @@ func restart_current_level():
 	current_level = current_level + 0
 	curret_output = ""
 	get_tree().reload_current_scene()
+	

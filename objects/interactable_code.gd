@@ -10,9 +10,18 @@ var output_word = "output"
 
 @onready var eat_letter_sound = $eatLetterSound
 @onready var print_sound = $printSound
-
+@onready var reset_sound = $resetSound
+@onready var level_complete_sound = $levelCompleteSound
+@onready var eat_nothing = $eatNothing
 # Called when the node enters the scene tree for the first time.
 func _ready():
+#	print("previous ", Globals.previous_level)
+	print("current_level ", Globals.current_level)
+	if Globals.should_play_reset_sound:
+		reset_sound.play()
+		Globals.should_play_reset_sound = false
+#	elif Globals.current_level != 0:
+#		level_complete_sound.play()
 	show_backspace_coming()
 	self.text_to_show = Globals.get_current_level_data()
 	print(zip_coming_characters(text_to_show))
@@ -45,9 +54,18 @@ func remove_space_from_deleting_data_beginning():
 			Globals.current_deleting_data[i] = Globals.current_deleting_data[i].substr(1)
 			if Globals.current_deleting_data[i].length() == 0:
 				#TODO: check if the character was supposed to delete the single character (current) or whole line
-				text_to_show_lines[i] = text_to_show_lines[i].substr(0, text_to_show_lines[i].length() - 1)
+				if deleted_character == "<":
+					text_to_show_lines[i] = text_to_show_lines[i].substr(0, text_to_show_lines[i].length() - 1)
+					if text_to_show_lines[i].length() == 0:
+						text_to_show_lines[i] = " "
+				elif deleted_character == "«":
+					text_to_show_lines[i] = " "
+				
 				eat_letter_sound.play()
 				Globals.current_deleting_data[i] = deleted_character
+			else:
+				eat_nothing.pitch_scale = (.4 * Globals.current_deleting_data[i].length())
+				eat_nothing.play()
 	print(text_to_show_lines)
 	text_to_show = "\n".join(text_to_show_lines)
 	
@@ -72,10 +90,7 @@ func add_line_numbers(to_add_to: String) -> String:
 	return "\n".join(lines) 
 
 func get_formatted_text_to_show():
-	var player_overall_pos = get_player_overall_pos()
-	
-	
-	
+	var player_overall_pos = get_player_overall_pos()	
 	var player_pos_showing = (text_to_show.substr(0, player_overall_pos) +
 				"[u][color=green]" + text_to_show.substr(player_overall_pos, 1) + "[/color][/u][font_size=1].[/font_size]" +
 				text_to_show.substr(player_overall_pos + 1))
@@ -83,16 +98,23 @@ func get_formatted_text_to_show():
 #	print("player_pos_showing\n", player_pos_showing)
 #	var lines_for_highlight = player_pos_showing.split("\n")
 #	lines_for_highlight[player_current_line_number] = "[u]" + lines_for_highlight[player_current_line_number] + "[/u]"
-	
-	
 #	var zipped = zip_coming_characters("\n".join(lines_for_highlight))
 	var zipped = zip_coming_characters(player_pos_showing)
 #	print("zipped\n", zipped)
 	var with_line_numbers = add_line_numbers(zipped)
 	var with_code_tag = Globals.add_code_tag_to_string(with_line_numbers)
 	print("with code tag\n", with_code_tag)
-	return with_code_tag
+	var syntax_colored = add_syntax_coloring(with_code_tag)
+	return syntax_colored
 
+func add_syntax_coloring(to_color):
+	var syntax_colored = (
+		to_color.replace("output", "[color=#578BB8]output[/color]")
+   				.replace("goto", "[color=#c24810]goto[/color]")
+	)
+	return syntax_colored
+	
+	
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -147,8 +169,13 @@ func get_word_on_cursor():
 func advance_level():
 	if Globals.curret_output == Globals.current_level_goal:
 		print("level complete!")
-		Globals.current_level += 1
-		Globals.restart_current_level()
+		
+		level_complete_sound.play()
+		$startNewLevelTimer.start(1)
+
+func _on_start_new_level_timer_timeout():
+	Globals.current_level += 1
+	Globals.restart_current_level()
 
 func check_level_advance():
 #	var word_on_cursor = get_word_on_cursor()
@@ -161,11 +188,17 @@ func check_level_advance():
 
 func run_current_line():
 	var current_line_text = text_to_show.split("\n")[player_current_line_number]
-	if current_line_text.begins_with(output_word):
-		var words_on_line = current_line_text.split(" ")
-		if words_on_line.size() > 1:
-			Globals.curret_output += words_on_line[1]
-			print_sound.play()
+	var words_on_line = current_line_text.split(" ")
+	print(current_line_text)
+	print(words_on_line)
+	if words_on_line.size() <= 1:
+		return
+	if current_line_text.begins_with(output_word) and Globals.curret_output.length() < 5:
+		Globals.curret_output += words_on_line[1]
+		print_sound.play()
+	elif current_line_text.begins_with("goto"):
+		player_current_line_number = int(words_on_line[-1]) - 1
+		update_pos_and_display()
 	
 func show_backspace_coming():
 	var test_string = """hi
@@ -186,6 +219,7 @@ func check_input():
 		advance_level()
 #		check_level_advance()
 	if Input.is_action_just_pressed("reset"):
+		Globals.should_play_reset_sound = true
 		Globals.restart_current_level()
 	if Input.is_action_just_pressed("down"):
 		player_current_line_number += 1
@@ -203,12 +237,16 @@ func check_input():
 		moved = true
 	
 	if moved:
-		adjust_for_edge_cases()
-		update_text_display()
+		update_pos_and_display()
 		move_deleting_characters()
-		adjust_for_edge_cases()
-		update_text_display()
+		update_pos_and_display()
+		
 		print("word on cursor is ", get_word_on_cursor())
+
+func update_pos_and_display():
+	adjust_for_edge_cases()
+	update_text_display()
+	
 
 func _on_delete_from_end_timer_timeout():
 #	text_to_show = text_to_show.substr(0, text_to_show.length() - 1)
@@ -225,6 +263,9 @@ func move_deleting_characters():
 func _on_move_in_deleting_characters_timeout():
 	pass
 #	move_deleting_characters()
+
+
+
 
 
 
