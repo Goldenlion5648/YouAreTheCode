@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://b785g1wongak"]
+
+[ext_resource type="PackedScene" uid="uid://c861ilg07e3r7" path="res://objects/goal_output.tscn" id="1_6yyw3"]
+[ext_resource type="Script" path="res://objects/intro.gd" id="2_2g7qk"]
+
+[node name="introScene" type="Node2D"]
+
+[node name="intro" parent="." instance=ExtResource("1_6yyw3")]
+offset_top = 125.0
+offset_right = 1151.0
+offset_bottom = 483.0
+theme_override_font_sizes/mono_font_size = 60
+text = ""
+script = ExtResource("2_2g7qk")
+
+[node name="introTimer" type="Timer" parent="intro"]
+autostart = true
+
+[node name="hintText" parent="intro" instance=ExtResource("1_6yyw3")]
+visible = false
+top_level = true
+offset_left = 2.0
+offset_top = 526.0
+offset_right = 1164.0
+offset_bottom = 648.0
+theme_override_font_sizes/mono_font_size = 54
+text = "[center][code]Press Enter or Spacebar to start[/code][/center]"
+script = ExtResource("2_2g7qk")
+
+[connection signal="timeout" from="intro/introTimer" to="intro" method="_on_intro_timer_timeout"]

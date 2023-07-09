@@ -52,6 +52,16 @@ stream = ExtResource("6_anqam")
 stream = ExtResource("7_ysogq")
 pitch_scale = 1.72
 
+[node name="spawnCodeTimer" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
+[node name="blinkCursorTimer" type="Timer" parent="."]
+wait_time = 0.75
+autostart = true
+
 [connection signal="timeout" from="deleteFromEndTimer" to="." method="_on_delete_from_end_timer_timeout"]
 [connection signal="timeout" from="moveInDeletingCharacters" to="." method="_on_move_in_deleting_characters_timeout"]
 [connection signal="timeout" from="startNewLevelTimer" to="." method="_on_start_new_level_timer_timeout"]
+[connection signal="timeout" from="spawnCodeTimer" to="." method="_on_spawn_code_timer_timeout"]
+[connection signal="timeout" from="blinkCursorTimer" to="." method="_on_blink_cursor_timer_timeout"]

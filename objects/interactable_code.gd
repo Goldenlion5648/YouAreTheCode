@@ -4,6 +4,9 @@ var text_to_show: String = ""
 
 var player_current_line_number = 0
 var player_pos_in_line = 2
+var level_typed_progress = 0
+var allowed_to_type = false
+var cursor_on = true
 
 var next_level_text = "submit"
 var output_word = "output"
@@ -25,7 +28,9 @@ func _ready():
 	show_backspace_coming()
 	self.text_to_show = Globals.get_current_level_data()
 	print(zip_coming_characters(text_to_show))
-	self.text = get_formatted_text_to_show()
+#TODO ADD THIS BACK IF NEEDED
+#	self.text = get_formatted_text_to_show(text_to_show)
+	
 	var a = [1, 2, 3]
 	var b = a.duplicate(true)
 	a.pop_back()
@@ -84,26 +89,28 @@ func add_line_numbers(to_add_to: String) -> String:
 	var lines = to_add_to.split("\n")
 	for i in range(lines.size()):
 		if player_current_line_number == i:
-			lines[i] = "[bgcolor=#3e3d32]" + str(i + 1) + "|" + ">" + lines[i] + "[/bgcolor]"
+			lines[i] = "[bgcolor=#3e3d32]" + str(i + 1) + "|" + (">" if cursor_on else " ") + lines[i] + "[/bgcolor]"
 		else:
 			lines[i] = str(i + 1) + "|" + " " + lines[i]
 	return "\n".join(lines) 
 
-func get_formatted_text_to_show():
+func get_formatted_text_to_show(to_format: String):
 	var player_overall_pos = get_player_overall_pos()	
-	var player_pos_showing = (text_to_show.substr(0, player_overall_pos) +
-				"[u][color=green]" + text_to_show.substr(player_overall_pos, 1) + "[/color][/u][font_size=1].[/font_size]" +
-				text_to_show.substr(player_overall_pos + 1))
+	var player_pos_showing = (to_format.substr(0, player_overall_pos) +
+				"[u][color=green]" + to_format.substr(player_overall_pos, 1) + "[/color][/u][font_size=1].[/font_size]" +
+				to_format.substr(player_overall_pos + 1))
 			
 #	print("player_pos_showing\n", player_pos_showing)
 #	var lines_for_highlight = player_pos_showing.split("\n")
 #	lines_for_highlight[player_current_line_number] = "[u]" + lines_for_highlight[player_current_line_number] + "[/u]"
 #	var zipped = zip_coming_characters("\n".join(lines_for_highlight))
-	var zipped = zip_coming_characters(player_pos_showing)
+	var zipped = player_pos_showing
+	if allowed_to_type:
+		zipped = zip_coming_characters(player_pos_showing)
 #	print("zipped\n", zipped)
 	var with_line_numbers = add_line_numbers(zipped)
 	var with_code_tag = Globals.add_code_tag_to_string(with_line_numbers)
-	print("with code tag\n", with_code_tag)
+#	print("with code tag\n", with_code_tag)
 	var syntax_colored = add_syntax_coloring(with_code_tag)
 	return syntax_colored
 
@@ -146,7 +153,7 @@ func adjust_for_edge_cases():
 
 	
 func update_text_display():
-	self.text = get_formatted_text_to_show()
+	self.text = get_formatted_text_to_show(text_to_show)
 #	print("current line is ", player_current_line_number)
 #	print("current pos in line is ", player_pos_in_line)
 
@@ -213,6 +220,8 @@ func show_backspace_coming():
 
 func check_input():
 	var moved = false
+	if not allowed_to_type:
+		return
 	if Input.is_action_just_pressed("enter_word"):
 		print("checking")
 		run_current_line()	
@@ -266,11 +275,21 @@ func _on_move_in_deleting_characters_timeout():
 
 
 
+func _on_spawn_code_timer_timeout():
+	level_typed_progress += 1
+	self.text = get_formatted_text_to_show(text_to_show.substr(0, level_typed_progress))
+	if level_typed_progress >= text_to_show.length():
+		$spawnCodeTimer.stop()
+		allowed_to_type = true
+		update_text_display()
+	pass # Replace with function body.
 
 
 
 
 
-
-
-
+func _on_blink_cursor_timer_timeout():
+	cursor_on = not cursor_on
+	if allowed_to_type:
+		update_text_display()
+	$blinkCursorTimer.start(.6)
