@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="GMTKRolesReversed"
-run/main_scene="res://objects/main_scene.tscn"
+run/main_scene="res://objects/intro_scene.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -65,4 +65,5 @@ reset={
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.152941, 0.156863, 0.133333, 1)

@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=3 uid="uid://cdclxnj7lc8ng"]
+
+[ext_resource type="PackedScene" uid="uid://c861ilg07e3r7" path="res://objects/goal_output.tscn" id="1_ycdho"]
+[ext_resource type="Script" path="res://objects/end_script.gd" id="2_nm6t0"]
+[ext_resource type="Script" path="res://objects/intro.gd" id="3_smw7q"]
+[ext_resource type="Script" path="res://objects/eater.gd" id="4_0t71c"]
+[ext_resource type="AudioStream" uid="uid://ddrneqtcy7rvh" path="res://sounds/keypress.wav" id="4_uths8"]
+
+[node name="endScene" type="Node2D"]
+
+[node name="outro" parent="." instance=ExtResource("1_ycdho")]
+offset_top = 125.0
+offset_right = 1151.0
+offset_bottom = 483.0
+theme_override_font_sizes/mono_font_size = 60
+text = ""
+script = ExtResource("2_nm6t0")
+
+[node name="introTimer" type="Timer" parent="outro"]
+wait_time = 0.001
+autostart = true
+
+[node name="hintText" parent="outro" instance=ExtResource("1_ycdho")]
+visible = false
+top_level = true
+layout_mode = 0
+offset_left = 2.0
+offset_top = 526.0
+offset_right = 1164.0
+offset_bottom = 648.0
+theme_override_font_sizes/mono_font_size = 54
+text = "[center][code]Press Enter or Spacebar to [color=red]goto[/color] beginning[/code][/center]"
+script = ExtResource("3_smw7q")
+
+[node name="typingSound" type="AudioStreamPlayer2D" parent="outro"]
+stream = ExtResource("4_uths8")
+volume_db = 5.059
+
+[node name="eater" parent="." instance=ExtResource("1_ycdho")]
+top_level = true
+offset_left = 6.0
+offset_top = 409.0
+offset_right = 1168.0
+offset_bottom = 531.0
+theme_override_font_sizes/mono_font_size = 54
+text = ""
+script = ExtResource("4_0t71c")
+
+[node name="eaterTimer" type="Timer" parent="eater"]
+wait_time = 0.001
+autostart = true
+
+[connection signal="timeout" from="outro/introTimer" to="outro" method="_on_intro_timer_timeout"]
+[connection signal="timeout" from="eater/eaterTimer" to="eater" method="_on_eater_timer_timeout"]

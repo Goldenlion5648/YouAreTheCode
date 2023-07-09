@@ -1,21 +1,18 @@
-[gd_scene load_steps=5 format=3 uid="uid://iyhi1gcl40iy"]
+[gd_scene load_steps=6 format=3 uid="uid://iyhi1gcl40iy"]
 
 [ext_resource type="PackedScene" uid="uid://c5b7r4rek08no" path="res://objects/interactable_code.tscn" id="1_me5ax"]
 [ext_resource type="PackedScene" uid="uid://dfkfrspqsl8ps" path="res://objects/output_window.tscn" id="2_3ycww"]
 [ext_resource type="PackedScene" uid="uid://c861ilg07e3r7" path="res://objects/goal_output.tscn" id="3_dx4wd"]
 [ext_resource type="Script" path="res://objects/goal_output.gd" id="4_jqebl"]
+[ext_resource type="Script" path="res://objects/registers_window.gd" id="4_vn76y"]
 
 [node name="MainScene" type="Node2D"]
 
 [node name="interactable_code" parent="." instance=ExtResource("1_me5ax")]
-offset_right = 837.0
+offset_right = 826.0
 theme_override_constants/line_separation = -5
-theme_override_font_sizes/mono_font_size = 60
-text = "[code]say
-say 
-exit
-say 3
-[/code]"
+theme_override_font_sizes/mono_font_size = 48
+text = ""
 
 [node name="instructions" parent="." instance=ExtResource("3_dx4wd")]
 offset_left = 838.0
@@ -24,7 +21,7 @@ offset_right = 1154.0
 offset_bottom = 394.0
 theme_override_font_sizes/mono_font_size = 30
 text = "[code]Instructions:
-- Arrow keys or WASD to move
+- Arrow keys or W/S to change selected line
 - Enter or spacebar to run current line
 - R to reset
 
@@ -36,6 +33,17 @@ script = null
 layout_direction = 1
 offset_right = 1204.0
 offset_bottom = 342.0
+
+[node name="registers_window" parent="." instance=ExtResource("2_3ycww")]
+custom_minimum_size = Vector2(400, 80)
+offset_left = 4.0
+offset_top = 371.0
+offset_right = 495.0
+offset_bottom = 641.0
+theme_override_font_sizes/mono_font_size = 50
+text = ""
+fit_content = true
+script = ExtResource("4_vn76y")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 offset_left = 604.0

@@ -1,9 +1,9 @@
 extends RichTextLabel
 
 var type_progress = 0
-var to_show = """Now you are the computer!
-Don't let the code that you
-need get deleted by the user!"""
+var to_show = """Thank you for playing!"""
+
+
 var can_start_game = false
 @onready var typing_sound = $typingSound
 
@@ -25,6 +25,7 @@ func add_formatting(to_format: String):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	if Input.is_action_just_pressed("enter_word") and can_start_game:
+		Globals.current_level = 0
 		get_tree().change_scene_to_file("res://objects/main_scene.tscn")
 
 
@@ -47,3 +48,6 @@ func _on_intro_timer_timeout():
 	else:
 		$introTimer.start(0.04)
 	pass # Replace with function body.
+
+
+

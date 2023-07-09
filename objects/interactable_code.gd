@@ -13,28 +13,34 @@ var output_word = "output"
 
 @onready var eat_letter_sound = $eatLetterSound
 @onready var print_sound = $printSound
+@onready var typing_sound = $typingSound
 @onready var reset_sound = $resetSound
 @onready var level_complete_sound = $levelCompleteSound
 @onready var eat_nothing = $eatNothing
+@onready var ding_sound = $registerWriteSound
+@onready var jump_sound = $jumpSound
+@onready var error_sound = $errorSound
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-#	print("previous ", Globals.previous_level)
-	print("current_level ", Globals.current_level)
+	if Globals.game_done:
+		Globals.game_done = false
+		get_tree().change_scene_to_file("res://objects/end_scene.tscn")
+		
+		return
 	if Globals.should_play_reset_sound:
 		reset_sound.play()
 		Globals.should_play_reset_sound = false
+	if Globals.current_level == 0:
+		level_complete_sound.play()
 #	elif Globals.current_level != 0:
 #		level_complete_sound.play()
 	show_backspace_coming()
 	self.text_to_show = Globals.get_current_level_data()
-	print(zip_coming_characters(text_to_show))
+#	print(zip_coming_characters(text_to_show))
 #TODO ADD THIS BACK IF NEEDED
 #	self.text = get_formatted_text_to_show(text_to_show)
-	
-	var a = [1, 2, 3]
-	var b = a.duplicate(true)
-	a.pop_back()
-	print(b)
 	
 
 func get_player_overall_pos():
@@ -55,7 +61,7 @@ func remove_space_from_deleting_data_beginning():
 	for i in range(Globals.current_deleting_data.size()):
 		if Globals.current_deleting_data[i].length() >= 1:
 			var deleted_character = Globals.current_deleting_data[i][0] + ""
-			print("deleted character=", deleted_character)
+#			print("deleted character=", deleted_character)
 			Globals.current_deleting_data[i] = Globals.current_deleting_data[i].substr(1)
 			if Globals.current_deleting_data[i].length() == 0:
 				#TODO: check if the character was supposed to delete the single character (current) or whole line
@@ -71,7 +77,7 @@ func remove_space_from_deleting_data_beginning():
 			else:
 				eat_nothing.pitch_scale = (.4 * Globals.current_deleting_data[i].length())
 				eat_nothing.play()
-	print(text_to_show_lines)
+	# print(text_to_show_lines)
 	text_to_show = "\n".join(text_to_show_lines)
 	
 
@@ -104,9 +110,9 @@ func get_formatted_text_to_show(to_format: String):
 #	var lines_for_highlight = player_pos_showing.split("\n")
 #	lines_for_highlight[player_current_line_number] = "[u]" + lines_for_highlight[player_current_line_number] + "[/u]"
 #	var zipped = zip_coming_characters("\n".join(lines_for_highlight))
-	var zipped = player_pos_showing
+	var zipped = to_format
 	if allowed_to_type:
-		zipped = zip_coming_characters(player_pos_showing)
+		zipped = zip_coming_characters(to_format)
 #	print("zipped\n", zipped)
 	var with_line_numbers = add_line_numbers(zipped)
 	var with_code_tag = Globals.add_code_tag_to_string(with_line_numbers)
@@ -116,13 +122,18 @@ func get_formatted_text_to_show(to_format: String):
 
 func add_syntax_coloring(to_color):
 	var syntax_colored = (
-		to_color.replace("output", "[color=#578BB8]output[/color]")
+		to_color.replace("output", "[color=#29c6f2]output[/color]")
    				.replace("goto", "[color=#c24810]goto[/color]")
+   				.replace("store", "[color=#eb2fe4]store[/color]")
 	)
+	var regex = RegEx.new()
+	regex.compile("(\\$[a-z]+)")
+	syntax_colored = regex.sub(syntax_colored, "[color=#189e39]$1[/color]", true)
+	regex = RegEx.new()
+	regex.compile("( \\d+)")
+	syntax_colored = regex.sub(syntax_colored, "[color=#7915eb]$1[/color]", true)
 	return syntax_colored
 	
-	
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -168,15 +179,14 @@ func get_word_on_cursor():
 	if right_space == -1:
 		right_space = text_to_show.length()
 	
-	print("left space is ", left_space)
-	print("right space is ", right_space)
+	# print("left space is ", left_space)
+	# print("right space is ", right_space)
 	var word_on_cursor = text_to_show.substr(left_space, right_space - left_space)
 	return word_on_cursor
 
 func advance_level():
 	if Globals.curret_output == Globals.current_level_goal:
-		print("level complete!")
-		
+		# print("level complete!")
 		level_complete_sound.play()
 		$startNewLevelTimer.start(1)
 
@@ -191,21 +201,57 @@ func check_level_advance():
 #		advance_level()
 	pass
 
-
+func set_register_values_in_string(string: String):
+	var words = string.split(" ")
+	print(words)
+	for word in words:
+		if word.begins_with("$"):
+			var no_dollar = word.lstrip("$")
+			if no_dollar.strip_edges() != "":
+				Globals.registers[no_dollar] = Globals.registers.get(no_dollar, 0)
+	print("after setting ", Globals.registers)
 
 func run_current_line():
 	var current_line_text = text_to_show.split("\n")[player_current_line_number]
-	var words_on_line = current_line_text.split(" ")
-	print(current_line_text)
-	print(words_on_line)
+	var words_on_line = current_line_text.strip_edges().split(" ")
+	# print(current_line_text)
+	# print(words_on_line)
 	if words_on_line.size() <= 1:
+		error_sound.pitch_scale = randf_range(.7, 1.3)
+		error_sound.play()
 		return
 	if current_line_text.begins_with(output_word) and Globals.curret_output.length() < 5:
-		Globals.curret_output += words_on_line[1]
+		if words_on_line[1].begins_with("$"):
+			set_register_values_in_string(current_line_text)
+			Globals.curret_output += str(Globals.registers[words_on_line[1].lstrip("$")])
+		else:
+			Globals.curret_output += words_on_line[1]
+		print_sound.pitch_scale = randf_range(.8, 1.3)
 		print_sound.play()
 	elif current_line_text.begins_with("goto"):
 		player_current_line_number = int(words_on_line[-1]) - 1
 		update_pos_and_display()
+		print_sound.pitch_scale = randf_range(.5, 1.5)
+		jump_sound.play()
+	elif current_line_text.begins_with("store"):
+		if words_on_line.size() < 3:
+			error_sound.pitch_scale = randf_range(.7, 1.3)
+			error_sound.play()
+			return
+		set_register_values_in_string(current_line_text)
+		var expression = Expression.new()
+		var to_run = "".join(words_on_line.slice(3)).replace("$", "")
+		print("to run ", to_run)
+		expression.parse(to_run, Globals.registers.keys())
+		var result = expression.execute(Globals.registers.values())
+		if result == null:
+			error_sound.pitch_scale = randf_range(.7, 1.3)
+			error_sound.play()
+		else:
+			Globals.registers[words_on_line[1].lstrip("$")] = result
+			print(Globals.registers)
+			ding_sound.play()
+			update_pos_and_display()
 	
 func show_backspace_coming():
 	var test_string = """hi
@@ -214,8 +260,8 @@ func show_backspace_coming():
 	var backspace_regex = RegEx.new()
 	backspace_regex.compile("(.+)\n")
 	var replaced = backspace_regex.sub(test_string, "$1\n")
-	print(replaced)
-	print("a".repeat(6))
+	# print(replaced)
+	# print("a".repeat(6))
 	
 
 func check_input():
@@ -223,7 +269,7 @@ func check_input():
 	if not allowed_to_type:
 		return
 	if Input.is_action_just_pressed("enter_word"):
-		print("checking")
+		# print("checking")
 		run_current_line()	
 		advance_level()
 #		check_level_advance()
@@ -236,21 +282,21 @@ func check_input():
 	elif Input.is_action_just_pressed("up"):
 		player_current_line_number -= 1
 		moved = true
-	elif Input.is_action_just_pressed("left"):
-		player_pos_in_line -= 1
-		adjust_for_going_off_end_of_lines()
-		moved = true
-	elif Input.is_action_just_pressed("right"):
-		player_pos_in_line += 1
-		adjust_for_going_off_end_of_lines()
-		moved = true
+#	elif Input.is_action_just_pressed("left"):
+#		player_pos_in_line -= 1
+#		adjust_for_going_off_end_of_lines()
+#		moved = true
+#	elif Input.is_action_just_pressed("right"):
+#		player_pos_in_line += 1
+#		adjust_for_going_off_end_of_lines()
+#		moved = true
 	
 	if moved:
 		update_pos_and_display()
 		move_deleting_characters()
 		update_pos_and_display()
 		
-		print("word on cursor is ", get_word_on_cursor())
+		# print("word on cursor is ", get_word_on_cursor())
 
 func update_pos_and_display():
 	adjust_for_edge_cases()
@@ -278,6 +324,9 @@ func _on_move_in_deleting_characters_timeout():
 func _on_spawn_code_timer_timeout():
 	level_typed_progress += 1
 	self.text = get_formatted_text_to_show(text_to_show.substr(0, level_typed_progress))
+	if typing_sound.playing == false:
+		typing_sound.pitch_scale = randf_range(.5, 1.5)
+		typing_sound.play()
 	if level_typed_progress >= text_to_show.length():
 		$spawnCodeTimer.stop()
 		allowed_to_type = true
